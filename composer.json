@@ -1,5 +1,5 @@
 {
-  "name": "alirezacoinpay/entity-generator",
+  "name": "alirezappeto/entity-generator",
   "description": "A Laravel package to generate entity files",
   "type": "library",
   "license": "MIT",
