@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\{{ namePlural }}\Add{{ name }}Request;
+use App\Http\Requests\{{ namePlural }}\All{{ namePlural }}Request;
+use App\Http\Requests\{{ namePlural }}\Update{{ name }}Request;
+use App\Http\Resources\{{ name }}Resource;
+use App\Repositories\{{ name }}\{{ name }}RepositoryInterface;
+use Illuminate\Http\JsonResponse;
+
+class {{ name }}Controller extends Controller
+{
+    public function __construct(
+        protected {{ name }}RepositoryInterface $repository,
+    )
+    {}
+
+    public function show($id): JsonResponse
+    {
+
+        ${{ nameLower }} = $this->repository->findById($id);
+
+        return ${{ nameLower }} ? $this->success(new {{ name }}Resource(${{ nameLower }})) : $this->error('api.not_found.{{ nameLower }}', [], 404);
+    }
+    public function index(All{{ namePlural }}Request $request): JsonResponse
+    {
+        $validated = $request->validated();
+        ${{ namePluralLower }} = $this->repository->all($validated);
+
+        return $this->success(${{ namePluralLower }} );
+    }
+    public function store(Add{{ name }}Request $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        ${{ nameLower }} = $this->repository->create($validated);
+
+        return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.created.{{ nameLower }}');
+    }
+    public function update(Update{{ name }}Request $request, $id): JsonResponse
+    {
+        $validated = $request->validated();
+        $result = $this->repository->update($validated, $id);
+        if ($result) {
+            ${{ nameLower }} = $this->repository->findById($id);
+
+            return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.updated.{{ nameLower }}');
+        }
+
+        return $this->error( 'api.not_found.{{ nameLower }}', [], 404);
+
+    }
+    public function destroy($id): JsonResponse
+    {
+        $result = $this->repository->delete($id);
+        if ($result) {
+
+            return $this->success($result, 'api.deleted.{{ nameLower }}');
+        }
+
+        return $this->error('api.not_found.{{ nameLower }}', [], 404);
+    }
+    public function restore($id): JsonResponse
+    {
+        $result = $this->repository->restore($id);
+        if ($result) {
+
+            ${{ nameLower }} = $this->repository->findById($id);
+            return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.restored.{{ nameLower }}');
+        }
+
+        return $this->error('api.not_found.{{ nameLower }}', [], 404);
+    }
+}

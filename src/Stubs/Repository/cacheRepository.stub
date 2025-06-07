@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Repositories\{{ name }};
+
+use App\Models\{{ name }};
+use App\Repositories\BaseCacheRepository;
+use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\Cache;
+
+class {{ name }}CacheRepository extends BaseCacheRepository implements {{ name }}RepositoryInterface
+{
+    private string $tag = {{ name }}::TAG;
+    private int $timeToLive = 86000;
+
+    protected array $prefixes = [
+       'findById' => 'single_{{ name }}_id_',
+       'all' => 'all_{{ name }}s_',
+    ];
+
+    protected BaseRepository $repository;
+    public function __construct(
+        {{ name }}Repository $repository,
+    )
+    {
+        parent::__construct($repository);
+    }
+
+    public function findById($id)
+    {
+        $key = $this->generateKey([$id]);
+
+        return Cache::tags($this->tag)->remember($key, $this->timeToLive, function () use ($id) {
+           return $this->repository->findById($id);
+        });
+    }
+
+    public function all($params = [])
+    {
+        $key = $this->generateKey([$params]);
+
+        return Cache::tags($this->tag)->remember($key, $this->timeToLive, function () use ($params) {
+          return  $this->repository->all($params);
+        });
+    }
+
+}
