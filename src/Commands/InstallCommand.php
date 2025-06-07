@@ -1,6 +1,6 @@
 <?php
 
-namespace Appeto\EntityGenerator\Commands;
+namespace Alirezappeto\EntityGenerator\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;

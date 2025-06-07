@@ -1,6 +1,6 @@
 <?php
 
-namespace Appeto\EntityGenerator;
+namespace Alirezappeto\EntityGenerator;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -10,8 +10,8 @@ class EntityGeneratorServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Appeto\EntityGenerator\Commands\InstallCommand::class,
-                \Appeto\EntityGenerator\Commands\MakeEntityCommand::class,
+                \Alirezappeto\EntityGenerator\Commands\InstallCommand::class,
+                \Alirezappeto\EntityGenerator\Commands\MakeEntityCommand::class,
             ]);
         }
     }
