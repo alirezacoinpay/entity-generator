@@ -5,13 +5,13 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "alirezacoinpay\\EntityGenerator\\": "src/"
+      "Alirezappeto\\EntityGenerator\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "alirezacoinpay\\EntityGenerator\\EntityGeneratorServiceProvider"
+        "Alirezappeto\\EntityGenerator\\EntityGeneratorServiceProvider"
       ]
     }
   },
