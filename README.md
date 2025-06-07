@@ -5,4 +5,4 @@ A lightweight Laravel package to generate fully structured entity components (Mo
 ## 📦 Installation
 
 ```bash
-composer require alirezacoinpay/entity-generator
+composer require alirezappeto/entity-generator
