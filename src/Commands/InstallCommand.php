@@ -14,6 +14,7 @@ class InstallCommand extends Command
     {
         $this->info('🚀 Installing Entity Generator...');
 
+        $this->addHasIndexRulesTrait();
         $this->addMethodToMainController();
         $this->addRepositoryServiceProivder();
 
@@ -23,6 +24,12 @@ class InstallCommand extends Command
                 'source' => __DIR__ . '/../stubs/persianLanguage.stub',
                 'target' => base_path('lang/fa/api.php'),
                 'name'   => 'api',
+            ],
+            // Trait
+            [
+                'source' => __DIR__ . '/../stubs/addHasIndexRulesTrait.stub',
+                'target' => app_path('Traits/HasIndexRules.php'),
+                'name'   => 'HasIndexRules',
             ],
             // BaseModel
             [
@@ -143,6 +150,11 @@ EOD;
         ]);
 
         $this->info("✅ provider for repositories created.");
+    }
+
+    private function addHasIndexRulesTrait()
+    {
+        
     }
 
 }
