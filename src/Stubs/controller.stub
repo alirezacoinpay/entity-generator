@@ -14,63 +14,68 @@ class {{ name }}Controller extends Controller
 {
     public function __construct(
         protected {{ name }}RepositoryInterface $repository,
-    )
-    {}
+    ) {}
 
     public function show($id): JsonResponse
     {
+        ${{ camelName }} = $this->repository->findById($id);
 
-        ${{ nameLower }} = $this->repository->findById($id);
-
-        return ${{ nameLower }} ? $this->success(new {{ name }}Resource(${{ nameLower }})) : $this->error('api.not_found.{{ nameLower }}', [], 404);
+        return ${{ camelName }}
+            ? $this->success(new {{ name }}Resource(${{ camelName }}))
+            : $this->error('api.not_found.{{ camelName }}', [], 404);
     }
+
     public function index(All{{ namePlural }}Request $request): JsonResponse
     {
         $validated = $request->validated();
-        ${{ namePluralLower }} = $this->repository->all($validated);
+        ${{ camelPlural }} = $this->repository->all($validated);
 
-        return $this->success(${{ namePluralLower }} );
+        return $this->success(${{ camelPlural }});
     }
+
     public function store(Add{{ name }}Request $request): JsonResponse
     {
         $validated = $request->validated();
+        ${{ camelName }} = $this->repository->create($validated);
 
-        ${{ nameLower }} = $this->repository->create($validated);
-
-        return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.created.{{ nameLower }}');
+        return $this->success(new {{ name }}Resource(${{ camelName }}), 'api.created.{{ nameLower }}');
     }
+
     public function update(Update{{ name }}Request $request, $id): JsonResponse
     {
         $validated = $request->validated();
-        $result = $this->repository->update($validated, $id);
-        if ($result) {
-            ${{ nameLower }} = $this->repository->findById($id);
+        ${{ camelName }} = $this->repository->findByIdLight($id);
 
-            return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.updated.{{ nameLower }}');
+        if (${{ camelName }}) {
+            $this->repository->update($id, $validated);
+            ${{ camelName }} = $this->repository->findById($id);
+
+            return $this->success(new {{ name }}Resource(${{ camelName }}), 'api.updated.{{ nameLower }}');
         }
 
-        return $this->error( 'api.not_found.{{ nameLower }}', [], 404);
-
+        return $this->error('api.not_found.{{ camelName }}', [], 404);
     }
+
     public function destroy($id): JsonResponse
     {
         $result = $this->repository->delete($id);
-        if ($result) {
 
+        if ($result) {
             return $this->success($result, 'api.deleted.{{ nameLower }}');
         }
 
-        return $this->error('api.not_found.{{ nameLower }}', [], 404);
+        return $this->error('api.not_found.{{ camelName }}', [], 404);
     }
+
     public function restore($id): JsonResponse
     {
         $result = $this->repository->restore($id);
-        if ($result) {
 
-            ${{ nameLower }} = $this->repository->findById($id);
-            return $this->success(new {{ name }}Resource(${{ nameLower }}), 'api.restored.{{ nameLower }}');
+        if ($result) {
+            ${{ camelName }} = $this->repository->findById($id);
+            return $this->success(new {{ name }}Resource(${{ camelName }}), 'api.restored.{{ nameLower }}');
         }
 
-        return $this->error('api.not_found.{{ nameLower }}', [], 404);
+        return $this->error('api.not_found.{{ camelName }}', [], 404);
     }
 }

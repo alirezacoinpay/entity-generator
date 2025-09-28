@@ -27,6 +27,10 @@ class MakeEntityCommand extends Command
         $nameLower = Str::lower($name);
         $namePluralLower = Str::plural($nameLower);
         $namePlural = Str::plural($name);
+        $pascalName = Str::pascal($name);
+        $camelPlural = Str::camel(Str::plural($name));
+        $camelName = Str::camel($name);
+
 
         $this->generateMigration($name);
         $this->addBindingToRepositoryServiceProvider($name);
@@ -54,6 +58,9 @@ class MakeEntityCommand extends Command
             $content = str_replace('{{ nameLower }}', $nameLower, $content);
             $content = str_replace('{{ namePluralLower }}', $namePluralLower, $content);
             $content = str_replace('{{ namePlural }}', $namePlural, $content);
+            $content = str_replace('{{ pascalName }}', $pascalName, $content);
+            $content = str_replace('{{ camelName }}', $camelName, $content);
+            $content = str_replace('{{ camelPlural }}', $camelPlural, $content);
             File::ensureDirectoryExists(dirname(base_path($path)));
             File::put(base_path($path), $content);
             $this->info("Created: {$path}");
@@ -82,7 +89,7 @@ class MakeEntityCommand extends Command
         $this->info("✅ Migration for {$table} created.");
     }
 
-    private function addBindingToRepositoryServiceProvider($name)
+    private function addBindingToRepositoryServiceProviderOld($name)
     {
         $providerPath = app_path('Providers/RepositoryServiceProvider.php');
 
@@ -143,5 +150,59 @@ class MakeEntityCommand extends Command
         File::put($providerPath, $content);
         $this->info("✅ Binding and use statements for {$name} added to RepositoryServiceProvider.");
     }
+
+    private function addBindingToRepositoryServiceProvider($name)
+    {
+        $providerPath = app_path('Providers/RepositoryServiceProvider.php');
+
+        if (!File::exists($providerPath)) {
+            $this->warn("⚠️ RepositoryServiceProvider.php not found. Skipping binding registration.");
+            return;
+        }
+
+        $content = File::get($providerPath);
+
+        // --- Step 1: ensure grouped use block exists ---
+        $useBlockPattern = '/use\s+App\\\\Repositories\\\\\{([^}]*)\};/s';
+        $newEntries = [
+            "{$name}\\{$name}RepositoryInterface",
+            "{$name}\\{$name}Repository",
+            "{$name}\\{$name}CacheRepository",
+        ];
+
+        if (preg_match($useBlockPattern, $content, $matches)) {
+            // Normalize and deduplicate
+            $existingEntries = array_filter(array_map('trim', explode(',', trim($matches[1]))));
+            foreach ($newEntries as $entry) {
+                if (!in_array($entry, $existingEntries, true)) {
+                    $existingEntries[] = $entry;
+                }
+            }
+            sort($existingEntries); // keep alphabetical order
+            $replacement = "use App\\Repositories\\{\n    " . implode(",\n    ", $existingEntries) . ",\n};";
+            $content = preg_replace($useBlockPattern, $replacement, $content);
+        } else {
+            // Insert new block after namespace
+            $replacement = "namespace App\\Providers;\n\nuse App\\Repositories\\{\n    " . implode(",\n    ", $newEntries) . ",\n};";
+            $content = preg_replace('/namespace\s+App\\\Providers;/', $replacement, $content, 1);
+        }
+
+        // --- Step 2: bindings logic (same as before, add to cache/plain groups) ---
+        $cacheBinding = "\$this->app->bind({$name}RepositoryInterface::class, {$name}CacheRepository::class);";
+        $plainBinding = "\$this->app->bind({$name}RepositoryInterface::class, {$name}Repository::class);";
+
+        if (!str_contains($content, $cacheBinding)) {
+            $content = preg_replace('/\/\/ cache bindings/', "\$0\n            {$cacheBinding}", $content);
+        }
+
+        if (!str_contains($content, $plainBinding)) {
+            $content = preg_replace('/\/\/ plain bindings/', "\$0\n            {$plainBinding}", $content);
+        }
+
+        File::put($providerPath, $content);
+        $this->info("✅ Repository {$name} added to RepositoryServiceProvider (use + bindings).");
+    }
+
+
 
 }

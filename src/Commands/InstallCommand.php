@@ -27,7 +27,7 @@ class InstallCommand extends Command
             ],
             // Trait
             [
-                'source' => __DIR__ . '/../stubs/addHasIndexRulesTrait.stub',
+                'source' => __DIR__ . '/../stubs/hasIndexRulesTrait.stub',
                 'target' => app_path('Traits/HasIndexRules.php'),
                 'name'   => 'HasIndexRules',
             ],
@@ -91,6 +91,9 @@ class InstallCommand extends Command
 
     public function success(\$data = [], string \$message = '', int \$status = 200): JsonResponse
     {
+        if (\$data instanceof \Illuminate\Http\Resources\Json\JsonResource) {
+            \$data = \$data->response()->getData(true);
+        }
         return response()->json([
             'success' => true,
             'data' => \$data,

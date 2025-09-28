@@ -13,8 +13,9 @@ class {{ name }}CacheRepository extends BaseCacheRepository implements {{ name }
     private int $timeToLive = 86000;
 
     protected array $prefixes = [
-       'findById' => 'single_{{ name }}_id_',
-       'all' => 'all_{{ name }}s_',
+       'findById' => 'single_{{ nameLower }}_id_',
+       'findByIdLight' => 'single_light_{{ nameLower }}_id_',
+       'all' => 'all_{{ namePluralLower }}s_',
     ];
 
     protected BaseRepository $repository;
@@ -25,6 +26,14 @@ class {{ name }}CacheRepository extends BaseCacheRepository implements {{ name }
         parent::__construct($repository);
     }
 
+    public function findByIdLight($id)
+    {
+        $key = $this->generateKey([$id]);
+
+        return Cache::tags($this->tag)->remember($key, $this->timeToLive, function () use ($id) {
+           return $this->repository->findByIdLight($id);
+        });
+    }
     public function findById($id)
     {
         $key = $this->generateKey([$id]);
